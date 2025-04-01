@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title> Online Class </title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #ff0000;
+            --primary-dark: #cc0000;
+            --background-color: #121212;
+            --surface-color: #1e1e1e;
+            --secondary-surface: #252525;
+            --text-color: #ffffff;
+            --secondary-text: #aaaaaa;
+            --border-color: #333333;
+            --hover-color: #2e2e2e;
+            --active-color: #3a3a3a;
+            --card-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+            --transition-speed: 0.3s;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Roboto', 'Segoe UI', Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--background-color);
+            color: var(--text-color);
+            transition: all var(--transition-speed);
+            padding: 15px;
+            min-height: 100vh;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        h1 {
+            color: var(--primary-color);
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo-icon {
+            color: var(--primary-color);
+        }
+
+        .theme-toggle {
+            background: var(--surface-color);
+            border: none;
+            color: var(--text-color);
+            font-size: 1rem;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all var(--transition-speed);
+            box-shadow: var(--card-shadow);
+        }
+
+        .theme-toggle:hover {
+            background-color: var(--hover-color);
+            transform: scale(1.05);
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .player-container {
+            width: 100%;
+            position: relative;
+        }
+
+        .player-wrapper {
+            position: relative;
+            width: 100%;
+            padding-bottom: 56.25%; /* 16:9 Aspect Ratio by default */
+            overflow: hidden;
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+            background-color: #000;
+        }
+
+        .player {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .playlist-container {
+            width: 100%;
+            max-height: 50vh;
+            overflow-y: auto;
+            background-color: var(--surface-color);
+            border-radius: 12px;
+            padding: 0;
+            box-shadow: var(--card-shadow);
+            scrollbar-width: thin;
+            scrollbar-color: var(--primary-color) var(--surface-color);
+        }
+
+        .playlist-container::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .playlist-container::-webkit-scrollbar-track {
+            background: var(--surface-color);
+            border-radius: 0 12px 12px 0;
+        }
+
+        .playlist-container::-webkit-scrollbar-thumb {
+            background-color: var(--primary-color);
+            border-radius: 20px;
+        }
+
+        .playlist-header {
+            position: sticky;
+            top: 0;
+            background-color: var(--surface-color);
+            padding: 12px;
+            z-index: 10;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .search-bar {
+            width: 100%;
+            padding: 10px 15px;
+            border-radius: 25px;
+            border: none;
+            background-color: var(--secondary-surface);
+            color: var(--text-color);
+            font-size: 14px;
+            outline: none;
+            transition: all var(--transition-speed);
+        }
+
+        .search-bar:focus {
+            box-shadow: 0 0 0 2px var(--primary-color);
+        }
+
+        .playlist-item {
+            padding: 10px 12px;
+            margin: 0 8px 6px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all var(--transition-speed);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background-color: var(--secondary-surface);
+        }
+
+        .playlist-item:hover {
+            background-color: var(--hover-color);
+            transform: translateX(3px);
+        }
+
+        .playlist-item.active {
+            background-color: var(--primary-color);
+            color: white;
+            box-shadow: 0 4px 12px rgba(255, 0, 0, 0.3);
+        }
+
+        .playlist-item.active:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .playlist-thumbnail {
+            width: 60px;
+            height: 40px;
+            border-radius: 4px;
+            object-fit: cover;
+            transition: all var(--transition-speed);
+        }
+
+        .playlist-item.active .playlist-thumbnail {
+            transform: scale(1.05);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .playlist-title {
+            font-size: 13px;
+            font-weight: 500;
+            flex: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .playlist-group {
+            margin-bottom: 15px;
+        }
+
+        .playlist-group-title {
+            font-size: 14px;
+            font-weight: bold;
+            margin: 12px 12px 8px;
+            color: var(--primary-color);
+            padding-bottom: 5px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .group-icon {
+            font-size: 12px;
+        }
+
+        .now-playing {
+            position: absolute;
+            top: -20px;
+            left: 10px;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(255, 0, 0, 0.3);
+            z-index: 2;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .now-playing i {
+            font-size: 9px;
+        }
+
+        /* Portrait mode adjustments */
+        @media (orientation: portrait) {
+            .player-wrapper {
+                padding-bottom: 75%; /* Taller aspect ratio for portrait */
+            }
+            
+            .playlist-container {
+                max-height: 40vh;
+            }
+        }
+
+        /* Landscape mode adjustments */
+        @media (orientation: landscape) {
+            .container {
+                flex-direction: row;
+            }
+            
+            .player-container {
+                flex: 2;
+            }
+            
+            .player-wrapper {
+                padding-bottom: 56.25%; /* Standard 16:9 in landscape */
+            }
+            
+            .playlist-container {
+                flex: 1;
+                max-height: 80vh;
+            }
+        }
+
+        /* Larger screens */
+        @media (min-width: 768px) {
+            body {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .theme-toggle {
+                font-size: 1.2rem;
+                width: 45px;
+                height: 45px;
+            }
+            
+            .container {
+                flex-direction: row;
+                gap: 25px;
+            }
+            
+            .player-wrapper {
+                padding-bottom: 56.25%; /* Standard 16:9 on larger screens */
+            }
+            
+            .playlist-container {
+                flex: 1;
+                max-height: 80vh;
+            }
+            
+            .playlist-item {
+                padding: 12px 15px;
+                margin: 0 10px 8px;
+            }
+            
+            .playlist-thumbnail {
+                width: 70px;
+                height: 45px;
+            }
+            
+            .playlist-title {
+                font-size: 14px;
+            }
+            
+            .playlist-group-title {
+                font-size: 16px;
+                margin: 15px 15px 10px;
+            }
+            
+            .now-playing {
+                top: -25px;
+                left: 15px;
+                padding: 5px 12px;
+                font-size: 12px;
+            }
+        }
+
+        /* Animation for playlist items */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .playlist-item {
+            animation: fadeIn 0.3s ease-out forwards;
+            opacity: 0;
+        }
+
+        .playlist-item:nth-child(1) { animation-delay: 0.1s; }
+        .playlist-item:nth-child(2) { animation-delay: 0.2s; }
+        .playlist-item:nth-child(3) { animation-delay: 0.3s; }
+        .playlist-item:nth-child(4) { animation-delay: 0.4s; }
+        .playlist-item:nth-child(5) { animation-delay: 0.5s; }
+        .playlist-item:nth-child(6) { animation-delay: 0.6s; }
+        .playlist-item:nth-child(7) { animation-delay: 0.7s; }
+        .playlist-item:nth-child(8) { animation-delay: 0.8s; }
+    </style>
+</head>
+
+<body class="dark-mode">
+    <header>
+        <h1><i class="fab fa-youtube logo-icon"></i> Online Class</h1>
+        <button class="theme-toggle">
+            <i class="fas fa-sun"></i>
+        </button>
+    </header>
+
+    <div class="container">
+        <div class="player-container">
+            <div class="now-playing">
+                <i class="fas fa-play"></i>
+                <span>NOW PLAYING</span>
+            </div>
+            <div class="player-wrapper">
+                <iframe class="player" src="https://www.youtube.com/embed?listType=playlist&list=PLwdQjDKF3LVH_ojaI7dxFOi8XtPkJLYc0"
+                    frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowfullscreen></iframe>
+            </div>
+        </div>
+
+        <div class="playlist-container">
+            <div class="playlist-header">
+                <input type="text" class="search-bar" placeholder="Search playlists...">
+            </div>
+            
+            <div class="playlist-group">
+                <div class="playlist-group-title">
+                    <i class="fas fa-graduation-cap group-icon"></i>
+                    Educational Playlists
+                </div>
+                <div class="playlist-item active" data-playlist="PLwdQjDKF3LVH_ojaI7dxFOi8XtPkJLYc0">
+                    <img class="playlist-thumbnail" src="https://i.ytimg.com/vi/il_t1WVLNxk/hqdefault.jpg" alt="Playlist thumbnail">
+                    <span class="playlist-title">Accounting RU+GST</span>
+                </div>
+               <div class="playlist-item" data-playlist="PLwdQjDKF3LVFVicwuLR8c5vt1cgvjqI1d">
+                    <img class="playlist-thumbnail" src="https://i.ytimg.com/vi/AfxHGNRtFac/hqdefault.jpg" alt="Playlist thumbnail">
+                    <span class="playlist-title">Managment RU</span>
+                </div>
+                <div class="playlist-item" data-playlist="PLwdQjDKF3LVHgjgncbwHiWpQEcorkuTvf">
+                    <img class="playlist-thumbnail" src="https://i.ytimg.com/vi/AfxHGNRtFac/hqdefault.jpg" alt="Playlist thumbnail">
+                    <span class="playlist-title">GK Ornob sir</span>
+                </div>
+                <div class="playlist-item" data-playlist="PLwdQjDKF3LVFF6wYtp6zEzquH4ZLNtIPT">
+                    <img class="playlist-thumbnail" src="https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg" alt="Playlist thumbnail">
+                    <span class="playlist-title">Marketing</span>
+                </div>
+                <div class="playlist-item" data-playlist="PLwdQjDKF3LVHWE1AfjZojjdMRbSy_xu-c">
+                    <img class="playlist-thumbnail" src="https://i.ytimg.com/vi/PkZNo7MFNFg/hqdefault.jpg" alt="Playlist thumbnail">
+                    <span class="playlist-title">Management</span>
+                </div>
+                <div class="playlist-item" data-playlist="PLwdQjDKF3LVFrUyR0KP8dxNkc8BFHpW4e">
+                    <img class="playlist-thumbnail" src="https://i9.ytimg.com/vi/-Weqdskf4aM/mqdefault.jpg" alt="Playlist thumbnail">
+                    <span class="playlist-title">English RU </span>
+                </div>
+                <div class="playlist-item" data-playlist="PLwdQjDKF3LVHcQgsZzmf-POwGlL8wPlVk">
+                    <img class="playlist-thumbnail" src="https://i.ytimg.com/vi/1Rs2ND1ryYc/hqdefault.jpg" alt="Playlist thumbnail">
+                    <span class="playlist-title">English (UCC)</span>
+                </div>
+                <div class="playlist-item" data-playlist="PLwdQjDKF3LVHhmxaqbeZGGpj50cAk61H0">
+                    <img class="playlist-thumbnail" src="https://i.ytimg.com/vi/il_t1WVLNxk/hqdefault.jpg" alt="Playlist thumbnail">
+                    <span class="playlist-title">Bangla RU Class</span>
+                </div>
+             <div class="playlist-item" data-playlist="PLwdQjDKF3LVHiGEgJFN5B60t_ONzxAt4F">
+                    <img class="playlist-thumbnail" src="https://i.ytimg.com/vi/AfxHGNRtFac/hqdefault.jpg" alt="Playlist thumbnail">
+                    <span class="playlist-title">Marketing RU</span>
+            </div>
+
+            <div class="playlist-group">
+                <div class="playlist-group-title">
+                    <i class="fas fa-ellipsis-h group-icon"></i>
+                    Other Playlists
+                </div>
+                <div class="playlist-item" data-playlist="PLwdQjDKF3LVFSwzLxpbfsUeqImMypRixi">
+                    <img class="playlist-thumbnail" src="https://i.ytimg.com/vi/9bZkp7q19f0/hqdefault.jpg" alt="Playlist thumbnail">
+                    <span class="playlist-title">Accounting round 2</span>
+                </div>
+                <div class="playlist-item" data-playlist="PLwdQjDKF3LVH9805nzQ2Us8lG8VrviX2a">
+                    <img class="playlist-thumbnail" src="https://i.ytimg.com/vi/J---aiyznGQ/hqdefault.jpg" alt="Playlist thumbnail">
+                    <span class="playlist-title">Accounting</span>
+                </div>
+                <div class="playlist-item" data-playlist="PLwdQjDKF3LVGtmOhvH3XgPuHZ9Eui70Tn">
+                    <img class="playlist-thumbnail" src="https://i.ytimg.com/vi/7ghhRHRP6t4/hqdefault.jpg" alt="Playlist thumbnail">
+                    <span class="playlist-title">Tech Reviews</span>
+                </div>
+                <div class="playlist-item" data-playlist="PLwdQjDKF3LVHb9B9r02Wei0Sm_KTFYZ4C">
+                    <img class="playlist-thumbnail" src="https://i.ytimg.com/vi/il_t1WVLNxk/hqdefault.jpg" alt="Playlist thumbnail">
+                    <span class="playlist-title">Podcast Highlights</span>
+                </div>
+                <div class="playlist-item" data-playlist="PLwdQjDKF3LVEwHOJ9uMJfVNT8uHjpQs5z">
+                    <img class="playlist-thumbnail" src="https://i.ytimg.com/vi/AfxHGNRtFac/hqdefault.jpg" alt="Playlist thumbnail">
+                    <span class="playlist-title">Travel Vlogs</span>
+                </div>
+                <div class="playlist-item" data-playlist="PLwdQjDKF3LVEuYnD2hPSrgpy-i1bfPFqe">
+                    <img class="playlist-thumbnail" src="https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg" alt="Playlist thumbnail">
+                    <span class="playlist-title">Cooking Tutorials</span>
+                </div>
+                <div class="playlist-item" data-playlist="PLwdQjDKF3LVFkVc6bNF4BTMNaUzJhAi7U">
+                    <img class="playlist-thumbnail" src="https://i.ytimg.com/vi/PkZNo7MFNFg/hqdefault.jpg" alt="Playlist thumbnail">
+                    <span class="playlist-title">Photography Tips</span>
+                </div>
+                <div class="playlist-item" data-playlist="PLwdQjDKF3LVGIT7V9IvHXUlCqmUeEg9BI">
+                    <img class="playlist-thumbnail" src="https://i.ytimg.com/vi/9bZkp7q19f0/hqdefault.jpg" alt="Playlist thumbnail">
+                    <span class="playlist-title">Productivity Hacks</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Dark mode toggle
+        const themeToggle = document.querySelector('.theme-toggle');
+        const body = document.body;
+        
+        // Set dark mode as default
+        body.classList.add('dark-mode');
+        
+        themeToggle.addEventListener('click', () => {
+            body.classList.toggle('dark-mode');
+            
+            // Change icon based on mode
+            const icon = themeToggle.querySelector('i');
+            if (body.classList.contains('dark-mode')) {
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+            } else {
+                icon.classList.remove('fa-sun');
+                icon.classList.add('fa-moon');
+            }
+        });
+
+        // Playlist selection
+        const playlistItems = document.querySelectorAll('.playlist-item');
+        const player = document.querySelector('.player');
+        const nowPlaying = document.querySelector('.now-playing');
+        
+        playlistItems.forEach(item => {
+            item.addEventListener('click', () => {
+                // Remove active class from all items
+                playlistItems.forEach(i => i.classList.remove('active'));
+                
+                // Add active class to clicked item
+                item.classList.add('active');
+                
+                // Update player with new playlist
+                const playlistId = item.getAttribute('data-playlist');
+                const playlistTitle = item.querySelector('.playlist-title').textContent;
+                player.src = `https://www.youtube.com/embed?listType=playlist&list=${playlistId}&autoplay=1`;
+                
+                // Update "Now Playing" text
+                nowPlaying.innerHTML = `<i class="fas fa-play"></i><span>NOW PLAYING: ${playlistTitle}</span>`;
+            });
+        });
+
+        // Search functionality
+        const searchBar = document.querySelector('.search-bar');
+        searchBar.addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            playlistItems.forEach(item => {
+                const title = item.querySelector('.playlist-title').textContent.toLowerCase();
+                if (title.includes(searchTerm)) {
+                    item.style.display = 'flex';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        });
+        
+        // Handle orientation changes
+        function handleOrientationChange() {
+            // You can add specific logic here if needed when orientation changes
+            console.log('Orientation changed');
+        }
+        
+        // Add orientation change listener
+        window.addEventListener('orientationchange', handleOrientationChange);
+    </script>
+</body>
+
+</html>
